@@ -1,0 +1,9 @@
+# Bỏ qua môi trường ảo (vì nó rất nặng và không cần thiết trên Git)
+venv/
+.env
+
+# Bỏ qua các file rác của Python
+__pycache__/
+*.pyc
+anh_choi
+logic.txt
