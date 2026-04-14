@@ -44,14 +44,16 @@ class RoleView:
 
         # 4. Nội dung quy tắc chơi
         content = (
-            "QUY TẮC ĐÁNH BÀI: BẠN CÓ THỂ ĐÁNH MỘT LÁ BÀI XUỐNG NẾU NÓ:\n"
-            "• CÙNG MÀU HOẶC CÙNG SỐ VỚI LÁ TRÊN CÙNG.\n"
-            "• CÙNG KÝ HIỆU/CHỨC NĂNG (VÍ DỤ: CẤM LƯỢT ĐÈ LÊN CẤM LƯỢT).\n"
-            "• NẾU KHÔNG CÓ BÀI ĐỂ ĐÁNH: PHẢI RÚT 1 LÁ.\n\n"
-            "QUY TẮC 'VỀ ĐÍCH':\n"
-            "• HÔ 'UNO': PHẢI HÔ KHI VỪA ĐÁNH LÁ BÀI KẾ CUỐI XUỐNG.\n\n"
-            "KẾT THÚC:\n"
-            "• VÒNG CHƠI DỪNG LẠI KHI CÓ MỘT NGƯỜI HẾT BÀI TRÊN TAY."
+            "[1] NGUYÊN TẮC ĐÁNH BÀI:\n"
+            "• Đánh hợp lệ nếu: Cùng hệ màu, Cùng con số, hoặc Cùng chức năng với lá bài cũ.\n"
+            "• Nếu bí bài: Bắt buộc bấm Rút Bài 1 lá. Hệ thống cho phép đánh luôn lá vừa rút hoặc Bỏ Qua lượt.\n\n"
+            "[2] QUYỀN NĂNG THẺ ĐẶC BIỆT THẦN THÁNH:\n"
+            "• Đổi Màu (Wild): Được thả bất cứ lúc nào để chuyển màu ván bài.\n"
+            "• +4 (Wild Draw 4): Bắt đối thủ ôm 4 lá! ĐƯỢC ĐÁNH TỰ DO bất chấp trên tay bạn đang có bài hay không!\n\n"
+            "[3] KHẮC CỐT GHI TÂM HÔ UNO! TRÁNH ĂN PHẠT:\n"
+            "• Nhấn gấp nút UNO khi chuẩn bị đánh lá bài kế cuối (nghĩa là trên tay sẽ xót lại đúng 1 thẻ).\n"
+            "• Nếu quên nói mà đánh lá bài xuống báo hại bản thân sẽ bị phạt bốc 2 lá.\n"
+            "• Ván chơi sẽ tự kết thúc nếu ai đó may mắn xả sạch tụ bài của mình trước!"
         )
         self.screen.draw.text(
             content, 

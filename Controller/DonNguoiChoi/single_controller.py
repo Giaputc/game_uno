@@ -15,6 +15,7 @@ class SinglePlayerController:
                 if key == 'BACK':
                     self.main_controller.game_state = "MENU"
                 elif key in ['EASY', 'NORMAL', 'HARD']:
-                    self.start_game(key)
-                return True
-        return False
+                    self.main_controller.game_state = "PLAYING"
+                    return key
+                return "HANDLED"
+        return None

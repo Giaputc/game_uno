@@ -7,6 +7,7 @@ from view.role_view import RoleView
 from view.DonNguoiChoi.difficulty_view import DifficultyView
 from Controller.game_controller import GameController
 from .DonNguoiChoi.single_controller import SinglePlayerController
+from .DonNguoiChoi.play_controller import PlayController
 
 class AppManager:
     def __init__(self, screen):
@@ -15,6 +16,7 @@ class AppManager:
         self.controller = GameController()
         
         self.single_player_ctr = SinglePlayerController(self.controller)
+        self.play_controller = PlayController(self.controller)
         
         self.menu_buttons, self.role_buttons, self.diff_buttons = init_buttons()
         
@@ -25,6 +27,8 @@ class AppManager:
     def update(self):
         if self.controller.game_state == "SPLASH":
             self.gif_bg.update()
+        elif self.controller.game_state == "PLAYING":
+            self.play_controller.update()
     def draw(self):
         state = self.controller.game_state
         mouse_pos = pygame.mouse.get_pos()
@@ -37,6 +41,8 @@ class AppManager:
             self.role_view.draw(self.role_buttons.values(), mouse_pos)
         elif state == "DIFFICULTY_SELECT":
             self.diff_view.draw(self.diff_buttons.values(), mouse_pos)
+        elif state == "PLAYING":
+            self.play_controller.draw()
 
     def handle_mouse_down(self, pos):
         state = self.controller.game_state
@@ -54,7 +60,12 @@ class AppManager:
                 self.safe_exit()
         
         elif state == "DIFFICULTY_SELECT":
-            self.single_player_ctr.handle_click(pos, self.diff_buttons)
+            action = self.single_player_ctr.handle_click(pos, self.diff_buttons)
+            if action in ['EASY', 'NORMAL', 'HARD']:
+                self.play_controller.start_game(self.screen, WIDTH, HEIGHT, action)
+
+        elif state == "PLAYING":
+            self.play_controller.handle_click(pos)
 
         elif state == "GUIDE":
             if self.role_buttons['BACK'].rect.collidepoint(pos):
