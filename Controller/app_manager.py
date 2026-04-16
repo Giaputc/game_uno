@@ -5,8 +5,10 @@ from model.landing_page import LandingPageGIF
 from view.menu_view import MenuView
 from view.role_view import RoleView
 from view.DonNguoiChoi.difficulty_view import DifficultyView
+from view.DaNguoiChoi.multi_select_view import MultiSelectView
 from Controller.game_controller import GameController
-from .DonNguoiChoi.single_controller import SinglePlayerController
+from Controller.DonNguoiChoi.single_controller import SinglePlayerController
+from Controller.DaNguoiChoi.multi_controller import MultiPlayerController
 
 class AppManager:
     def __init__(self, screen):
@@ -14,17 +16,24 @@ class AppManager:
         self.gif_bg = LandingPageGIF("Landing-Page.gif")
         self.controller = GameController()
         
-        self.single_player_ctr = SinglePlayerController(self.controller)
-        
-        self.menu_buttons, self.role_buttons, self.diff_buttons = init_buttons()
-        
+        self.single_player_ctr = SinglePlayerController(self.controller)  
+        self.multi_player_ctr = MultiPlayerController(self.controller)
+        self.menu_buttons, self.role_buttons, self.diff_buttons, self.multi_buttons = init_buttons()
+        #View
         self.menu_view = MenuView(screen, WIDTH, HEIGHT)
         self.role_view = RoleView(screen, WIDTH, HEIGHT)
         self.diff_view = DifficultyView(screen, WIDTH, HEIGHT)
+        self.multi_select_view = MultiSelectView(screen, WIDTH, HEIGHT)
 
     def update(self):
-        if self.controller.game_state == "SPLASH":
+        state = self.controller.game_state
+        if state == "SPLASH":
             self.gif_bg.update()
+        elif state == "PLAYING_SINGLE":
+            self.single_player_ctr.update()
+        elif state == "PLAYING_MULTI":
+            self.multi_player_ctr.update()
+            
     def draw(self):
         state = self.controller.game_state
         mouse_pos = pygame.mouse.get_pos()
@@ -37,6 +46,12 @@ class AppManager:
             self.role_view.draw(self.role_buttons.values(), mouse_pos)
         elif state == "DIFFICULTY_SELECT":
             self.diff_view.draw(self.diff_buttons.values(), mouse_pos)
+        elif state == "MULTI_SELECT":
+            self.multi_select_view.draw(self.multi_buttons.values(), mouse_pos)
+        elif state == "PLAYING_SINGLE":
+            self.single_player_ctr.draw(mouse_pos)
+        elif state == "PLAYING_MULTI":
+            self.multi_player_ctr.draw(mouse_pos)
 
     def handle_mouse_down(self, pos):
         state = self.controller.game_state
@@ -48,6 +63,8 @@ class AppManager:
             action = self.controller.handle_click(pos, self.menu_buttons)
             if action == 'SINGLE':
                 self.controller.game_state = "DIFFICULTY_SELECT"
+            elif action == 'MULTI':
+                self.controller.game_state = "MULTI_SELECT"
             elif action == 'GUIDE':
                 self.controller.game_state = "GUIDE"
             elif action == 'QUIT':
@@ -55,6 +72,15 @@ class AppManager:
         
         elif state == "DIFFICULTY_SELECT":
             self.single_player_ctr.handle_click(pos, self.diff_buttons)
+            
+        elif state == "MULTI_SELECT":
+            self.multi_player_ctr.handle_click(pos, self.multi_buttons)
+
+        elif state == "PLAYING_SINGLE":
+            self.single_player_ctr.handle_game_click(pos)
+            
+        elif state == "PLAYING_MULTI":
+            self.multi_player_ctr.handle_game_click(pos)
 
         elif state == "GUIDE":
             if self.role_buttons['BACK'].rect.collidepoint(pos):

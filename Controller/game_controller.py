@@ -1,5 +1,6 @@
 # File: Controller/game_controller.py
 import pygame
+import sys
 
 class GameController:
     def __init__(self):
@@ -15,3 +16,8 @@ class GameController:
                 if btn.rect.collidepoint(pos):
                     return key 
         return None
+
+    def safe_exit(self):
+        pygame.display.quit()
+        pygame.quit()
+        sys.exit()

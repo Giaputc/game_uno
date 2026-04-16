@@ -11,7 +11,7 @@ _GRAY_H = ( 90,  98, 104)
 _YELLOW = (255, 220,  30)
 
 
-class DifficultyView:
+class MultiSelectView:
     def __init__(self, screen, width, height):
         self.screen = screen
         self.width  = width
@@ -28,7 +28,7 @@ class DifficultyView:
                 img = pygame.image.load(bg_path).convert_alpha()
                 self.bg_image = pygame.transform.smoothscale(img, (width, height))
             except Exception as e:
-                print(f"[DifficultyView] bg load error: {e}")
+                print(f"[MultiSelectView] bg load error: {e}")
 
     def draw(self, buttons, mouse_pos):
         if self.bg_image:
@@ -37,9 +37,9 @@ class DifficultyView:
             self._surf.fill((28, 90, 50))
 
         draw_text_shadow(
-            self._surf, "Đơn người chơi", 48, _YELLOW,
+            self._surf, "Đa người chơi", 48, _YELLOW,
             shadow_color=(60, 30, 0), offset=(3, 3),
-            center=(self.width / 2, 130), bold=True,
+            center=(self.width / 2, 180), bold=True,
         )
 
         for btn in buttons:
