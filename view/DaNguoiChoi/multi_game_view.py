@@ -160,11 +160,9 @@ class MultiGameView:
         # 3. Discard pile
         top_card    = game_logic.get_top_card()
         discard_rect = pygame.Rect(self.width // 2 + 20, self.height // 2 - 50, 60, 90)
-        if top_card and getattr(top_card, 'image', None):
-            self.screen.blit(pygame.transform.scale(top_card.image, (60, 90)), discard_rect)
-        else:
-            c = _COLOR_MAP.get(top_card.color if top_card else 'black', (120, 120, 120))
-            pygame.draw.rect(self.screen.surface, c, discard_rect)
+        if top_card:
+            top_card.is_hovered = False
+            top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 60, 90)
 
         # 4. Info BOTs (bên trái/phải/trên)
         num_players = len(game_logic.players)
@@ -216,9 +214,8 @@ class MultiGameView:
             cy = y_base
             rect = pygame.Rect(cx, cy, card_w, card_h)
 
-            # Hover effect (nhô lên), clamped
-            if rect.collidepoint(mouse_pos) and game_logic.current_turn == 0:
-                rect.y = max(_TOP_BAR_H, rect.y - hover_lift)
+            # Cập nhật trạng thái hover
+            card.is_hovered = rect.collidepoint(mouse_pos) and game_logic.current_turn == 0
 
             self.human_card_rects.append(rect)
 
@@ -227,15 +224,8 @@ class MultiGameView:
             hit_rect = pygame.Rect(cx, cy, card_w if is_last else hit_w, card_h)
             self.human_hit_rects.append(hit_rect)
 
-            if card.image:
-                self.screen.blit(pygame.transform.scale(card.image, (card_w, card_h)), rect)
-            else:
-                col = _COLOR_MAP.get(card.color, (120, 120, 120))
-                lbl_size = max(10, min(14, card_w // 4))
-                pygame.draw.rect(self.screen.surface, col, rect, border_radius=5)
-                draw_text(self.screen.surface, str(card.value), lbl_size,
-                          (255, 255, 255) if card.color == 'black' else (0, 0, 0),
-                          center=rect.center)
+            # Vẽ bài có hiệu ứng
+            card.draw(self.screen.surface, cx, cy, card_w, card_h)
 
         # 6. Nút UNO
         uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)

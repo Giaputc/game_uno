@@ -156,14 +156,3 @@ class SinglePlayerController:
                     else:
                         pygame.draw.rect(surf, _COLOR_MAP.get(c, (128,128,128)), pygame.Rect(x, y, 80, 80))
         self.main_controller.game_state = "PLAYING"
-    
-    def handle_click(self, pos, diff_buttons):
-        for key, btn in diff_buttons.items():
-            if btn.rect.collidepoint(pos):
-                if key == 'BACK':
-                    self.main_controller.game_state = "MENU"
-                elif key in ['EASY', 'NORMAL', 'HARD']:
-                    self.main_controller.game_state = "PLAYING"
-                    return key
-                return "HANDLED"
-        return None

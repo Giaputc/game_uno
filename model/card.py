@@ -19,6 +19,8 @@ class Card:
         self.curr_x = None
         self.curr_y = None
 
+        self.load_image()
+
     def load_image(self):
         if not self.image:
             path = os.path.join(IMG_DIR, self.filename)
@@ -32,7 +34,7 @@ class Card:
             else:
                 print(f"Warning: Missing image file for {self.filename}")
 
-    def draw(self, screen, target_x, target_y):
+    def draw(self, screen, target_x, target_y, target_w=80, target_h=120):
         if not self.image:
             self.load_image()
             
@@ -50,9 +52,13 @@ class Card:
             
         # Cập nhật rect thực tế phục vụ click
         self.rect.topleft = (self.curr_x, self.curr_y)
+        self.rect.size = (target_w, target_h)
         
         if self.image:
-            screen.blit(self.image, (self.curr_x, self.curr_y))
+            img_to_draw = self.image
+            if self.image.get_width() != target_w or self.image.get_height() != target_h:
+                img_to_draw = pygame.transform.scale(self.image, (target_w, target_h))
+            screen.blit(img_to_draw, (self.curr_x, self.curr_y))
         else:
             surface = screen.surface if hasattr(screen, 'surface') else screen
             pygame.draw.rect(surface, (200, 200, 200), self.rect)

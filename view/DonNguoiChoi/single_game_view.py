@@ -172,11 +172,9 @@ class SingleGameView:
         # 4. Discard pile
         top_card     = game_logic.get_top_card()
         discard_rect = pygame.Rect(self.width // 2 + 50, self.height // 2 - 55, 70, 105)
-        if top_card and getattr(top_card, 'image', None):
-            self.screen.blit(top_card.image, discard_rect)
-        else:
-            c = _COLOR_MAP.get(top_card.color if top_card else 'black', (120, 120, 120))
-            pygame.draw.rect(self.screen.surface, c, discard_rect, border_radius=6)
+        if top_card:
+            top_card.is_hovered = False
+            top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 70, 105)
 
         # 5. Bài người chơi (phía dưới)
         human    = game_logic.players[0]
@@ -203,9 +201,8 @@ class SingleGameView:
             cy   = y_base
             rect = pygame.Rect(cx, cy, card_w, card_h)
 
-            # Hover effect — không cho nhô lên quá màn hình
-            if rect.collidepoint(mouse_pos) and game_logic.current_turn == 0:
-                rect.y = max(_TOP_BAR_H, rect.y - hover_lift)
+            # Cập nhật trạng thái hover cho card (bỏ qua rect.y tĩnh)
+            card.is_hovered = rect.collidepoint(mouse_pos) and game_logic.current_turn == 0
 
             self.human_card_rects.append(rect)
 
@@ -214,17 +211,8 @@ class SingleGameView:
             hit_rect = pygame.Rect(cx, cy, card_w if is_last else hit_w, card_h)
             self.human_hit_rects.append(hit_rect)
 
-            if card.image:
-                self.screen.blit(
-                    pygame.transform.scale(card.image, (card_w, card_h)), rect
-                )
-            else:
-                col = _COLOR_MAP.get(card.color, (120, 120, 120))
-                lbl_size = max(10, min(15, card_w // 4))
-                pygame.draw.rect(self.screen.surface, col, rect, border_radius=5)
-                draw_text(self.screen.surface, str(card.value), lbl_size,
-                          (255, 255, 255) if card.color == 'black' else (0, 0, 0),
-                          center=rect.center)
+            # Vẽ bài, hàm draw sẽ lo animation và hover
+            card.draw(self.screen.surface, cx, cy, card_w, card_h)
 
         # 6. Nút UNO
         uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
