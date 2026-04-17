@@ -61,5 +61,14 @@ class Card:
     def update_hover(self, mouse_pos):
         self.is_hovered = self.rect.collidepoint(mouse_pos)
 
+    def is_match(self, other_card, current_color):
+        if self.color == "black":
+            return True
+        if self.color == current_color:
+            return True
+        if hasattr(other_card, "value") and self.value == other_card.value:
+            return True
+        return False
+
     def __repr__(self):
         return f"{self.color} {self.value}"

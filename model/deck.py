@@ -36,14 +36,12 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.cards)
 
-    def draw(self, count=1):
-        drawn = []
-        for _ in range(count):
-            if not self.cards:
-                self.restock_from_discard()
-            if self.cards:
-                drawn.append(self.cards.pop())
-        return drawn
+    def draw(self):
+        if not self.cards:
+            self.restock_from_discard()
+        if self.cards:
+            return self.cards.pop()
+        return None
 
     def discard(self, card):
         self.discard_pile.append(card)
