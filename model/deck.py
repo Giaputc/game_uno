@@ -56,9 +56,17 @@ class Deck:
             # Giữ lại lá trên cùng
             top = self.discard_pile.pop()
             self.cards = self.discard_pile
-            self.discard_pile = [top]
             self.shuffle()
             print("Đã xào lại úp bài từ xấp bài đánh.")
+
+    def recycle(self, game_discard_pile):
+        if len(game_discard_pile) > 1:
+            top = game_discard_pile.pop()
+            self.cards = game_discard_pile[:] # copy
+            game_discard_pile.clear()
+            game_discard_pile.append(top)
+            self.shuffle()
+            print("Đã tái chế xấp bài đánh thành bộ bài rút.")
 
     # Ảnh mặt úp để vẽ xấp bài rút
     def get_back_image(self):
