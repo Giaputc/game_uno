@@ -89,7 +89,7 @@ class RoleView:
         )
         self.screen.draw.text(
             content, 
-            (85, 170),
+            (85, 145),
             width=620, 
             fontsize=17, 
             color="#1a2a4e", 
