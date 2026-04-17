@@ -3,9 +3,9 @@ import time
 import random
 from model.game_logic import GameLogic
 from model.player import Player
-from bots.bot_easy import BotEasy
-from bots.bot_normal import BotNormal
-from bots.bot_hard import BotHard
+from bots.easy_bot import EasyBot
+from bots.normal_bot import NormalBot
+from bots.hard_bot import HardBot
 from view.DaNguoiChoi.multi_game_view import MultiGameView
 from view.font_helper import draw_text_shadow
 from settings import WIDTH, HEIGHT
@@ -24,21 +24,22 @@ class MultiPlayerController:
         import __main__
         return getattr(__main__, 'screen', None)
 
-    def generate_random_bot(self, idx):
-        BotClasses = [BotEasy, BotNormal, BotHard]
-        SelectedClass = random.choice(BotClasses)
-        return SelectedClass(f"Bot {idx}")
 
     def start_game(self, mode):
         # mode là "P3" hoặc "P4"
         self.main_controller.game_state = "PLAYING_MULTI"
         self.color_picker_active = False
         
+        from model.player import AIPlayer
         players = [Player("You", is_human=True)]
-        num_bots = 2 if mode == "P3" else 3
         
-        for i in range(num_bots):
-            players.append(self.generate_random_bot(i+1))
+        # P3: Easy + Normal
+        # P4: Easy + Normal + Hard
+        players.append(AIPlayer("Bot 1 (Easy)", EasyBot()))
+        players.append(AIPlayer("Bot 2 (Normal)", NormalBot()))
+        
+        if mode == "P4":
+            players.append(AIPlayer("Bot 3 (Hard)", HardBot()))
             
         self.game_logic = GameLogic(players)
 
@@ -113,7 +114,11 @@ class MultiPlayerController:
                     self.last_move_time = time.time()
                     bot_idx = self.game_logic.current_turn
                     bot = self.game_logic.players[bot_idx]
-                    card_idx, picked_color = bot.decide_move(self.game_logic.get_top_card(), self.game_logic.current_color)
+                    
+                    next_player_idx = (bot_idx + self.game_logic.direction) % len(self.game_logic.players)
+                    max_hand_size = len(self.game_logic.players[next_player_idx].hand)
+
+                    card_idx, picked_color = bot.decide_move(self.game_logic.get_top_card(), self.game_logic.current_color, next_player_hand_size=max_hand_size)
                     
                     if card_idx is not None:
                         self.game_logic.play_turn(bot_idx, card_idx, picked_color)

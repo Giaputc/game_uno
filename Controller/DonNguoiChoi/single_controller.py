@@ -2,9 +2,9 @@ import pygame
 import time
 from model.game_logic import GameLogic
 from model.player import Player
-from bots.bot_easy import BotEasy
-from bots.bot_normal import BotNormal
-from bots.bot_hard import BotHard
+from bots.easy_bot import EasyBot
+from bots.normal_bot import NormalBot
+from bots.hard_bot import HardBot
 from view.DonNguoiChoi.single_game_view import SingleGameView
 from view.font_helper import draw_text_shadow
 from settings import WIDTH, HEIGHT
@@ -30,15 +30,15 @@ class SinglePlayerController:
         self.main_controller.game_state = "PLAYING_SINGLE"
         self.color_picker_active = False
         
-        # Tạo player
+        from model.player import AIPlayer
         human = Player("You", is_human=True)
         bot = None
         if difficulty == "EASY":
-            bot = BotEasy("Bot (Easy)")
+            bot = AIPlayer("Bot (Easy)", EasyBot())
         elif difficulty == "NORMAL":
-            bot = BotNormal("Bot (Normal)")
+            bot = AIPlayer("Bot (Normal)", NormalBot())
         else:
-            bot = BotHard("Bot (Hard)")
+            bot = AIPlayer("Bot (Hard)", HardBot())
             
         self.game_logic = GameLogic([human, bot])
 
@@ -121,7 +121,8 @@ class SinglePlayerController:
                 if time.time() - self.last_bot_move_time > 1.5:
                     self.last_bot_move_time = time.time()
                     bot = self.game_logic.players[1]
-                    card_idx, picked_color = bot.decide_move(self.game_logic.get_top_card(), self.game_logic.current_color)
+                    max_hand_size = max([len(p.hand) for p in self.game_logic.players if p != bot])
+                    card_idx, picked_color = bot.decide_move(self.game_logic.get_top_card(), self.game_logic.current_color, next_player_hand_size=max_hand_size)
                     
                     if card_idx is not None:
                         self.game_logic.play_turn(1, card_idx, picked_color)

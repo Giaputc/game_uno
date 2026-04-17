@@ -40,3 +40,34 @@ class Player:
     def decide_move(self, game_state):
         # Override ở các loại Bot khác nhau
         raise NotImplementedError("This method should be overridden.")
+
+
+class AIPlayer(Player):
+    def __init__(self, name, bot_logic):
+        super().__init__(name, is_human=False)
+        self.bot_logic = bot_logic
+
+    def decide_move(self, top_card, current_color, next_player_hand_size=5):
+        import random
+        
+        # Bot quên hô UNO hay không (Easy hay quên hơn)
+        if len(self.hand) == 2:
+            if hasattr(self.bot_logic, "name") and "Easy" in getattr(self.bot_logic, "name", "") and random.choice([True, False]):
+                pass
+            else:
+                self.yell_uno()
+
+        # Uỷ quyền chọn bài cho thuật toán thuật toán
+        card = self.bot_logic.choose_action(self.hand, top_card, current_color, next_player_hand_size=next_player_hand_size)
+        
+        if card:
+            idx = self.hand.index(card)
+            chosen_color = None
+            if getattr(card, "color", "") == "black":
+                if hasattr(self.bot_logic, "choose_color"):
+                    chosen_color = self.bot_logic.choose_color(self.hand)
+                else:
+                    chosen_color = random.choice(["red", "blue", "green", "yellow"])
+            return idx, chosen_color
+
+        return None, None
