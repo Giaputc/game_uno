@@ -97,17 +97,6 @@ class RoleView:
             lineheight=1.2
         )
 
-        lines = self._wrap_text(rules, 16, 630)
-        y = 148
-        for line in lines:
-            if line == '':
-                y += 8
-                continue
-            bold = line.startswith('QUY TẮC') or line.startswith("HÔ ") or line.startswith("KẾT ")
-            color = _NAVYLT if bold else _NAVY
-            draw_text(self._surf, line, 16, color, topleft=(82, y), bold=bold)
-            y += 22
-
         # 5. Nút Back / Quit
         for btn in buttons:
             hovered = btn.rect.collidepoint(mouse_pos)
