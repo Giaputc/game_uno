@@ -155,4 +155,3 @@ class SinglePlayerController:
                         self.view.screen.blit(img, (x, y))
                     else:
                         pygame.draw.rect(surf, _COLOR_MAP.get(c, (128,128,128)), pygame.Rect(x, y, 80, 80))
-        self.main_controller.game_state = "PLAYING"

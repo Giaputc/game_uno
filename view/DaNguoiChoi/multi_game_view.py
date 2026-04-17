@@ -157,13 +157,7 @@ class MultiGameView:
             draw_text(self.screen.surface, "Rút", 15, (0, 0, 0),
                       center=self.draw_btn_rect.center)
 
-        # 3. Discard pile
-        top_card    = game_logic.get_top_card()
-        discard_rect = pygame.Rect(self.width // 2 + 20, self.height // 2 - 50, 60, 90)
-        if top_card:
-            top_card.is_hovered = False
-            top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 60, 90)
-
+        # (Discard pile moved down to draw AFTER hands for proper z-index)
         # 4. Info BOTs (bên trái/phải/trên)
         num_players = len(game_logic.players)
         if num_players == 3:
@@ -183,6 +177,11 @@ class MultiGameView:
                 continue
             bot  = game_logic.players[i]
             x, y = int(pos[0]), int(pos[1])
+            
+            # Turn Indicator for bot
+            if game_logic.current_turn == i:
+                pygame.draw.circle(self.screen.surface, (255, 215, 0), (x, y), 50, 4)
+                
             pygame.draw.circle(self.screen.surface, (0, 0, 0), (x, y), 42)
             pygame.draw.circle(self.screen.surface, (80, 80, 80), (x, y), 42, 2)
             draw_text(self.screen.surface, bot.name[:6], 17, (200, 200, 200), center=(x, y - 16))
@@ -208,6 +207,11 @@ class MultiGameView:
         # Vùng click của mỗi lá = phần thực sự nhìn thấy khi bài chồng
         hit_w = spacing if spacing < card_w else card_w
 
+        # Turn Indicator for human player
+        if game_logic.current_turn == 0 and hand_len > 0:
+            total_w = min((hand_len - 1) * spacing + card_w, self.width - 2 * _SIDE_MARGIN)
+            pygame.draw.rect(self.screen.surface, (50, 255, 50), (start_x - 8, y_base - 8, total_w + 16, card_h + 16), 4, border_radius=8)
+
         for i, card in enumerate(human.hand):
             cx = int(start_x + i * spacing)
             cx = min(cx, self.width - _SIDE_MARGIN - card_w)
@@ -226,6 +230,13 @@ class MultiGameView:
 
             # Vẽ bài có hiệu ứng
             card.draw(self.screen.surface, cx, cy, card_w, card_h)
+
+        # 5.5 Vẽ Discard Pile đè lên trên để bài vừa đánh ra luôn nổi lướt qua màn hình
+        top_card    = game_logic.get_top_card()
+        discard_rect = pygame.Rect(self.width // 2 + 20, self.height // 2 - 50, 60, 90)
+        if top_card:
+            top_card.is_hovered = False
+            top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 60, 90)
 
         # 6. Nút UNO
         uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
