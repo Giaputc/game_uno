@@ -7,8 +7,8 @@ from view.role_view import RoleView
 from view.DonNguoiChoi.difficulty_view import DifficultyView
 from view.DaNguoiChoi.multi_select_view import MultiSelectView
 from Controller.game_controller import GameController
-from Controller.DonNguoiChoi.single_controller import SinglePlayerController
-from Controller.DaNguoiChoi.multi_controller import MultiPlayerController
+from .DonNguoiChoi.single_controller import SinglePlayerController
+from .DonNguoiChoi.play_controller import PlayController
 
 class AppManager:
     def __init__(self, screen):

@@ -74,20 +74,27 @@ class RoleView:
         inner = pygame.Rect(70, 135, 660, 390)
         pygame.draw.rect(self._surf, _PANEL_BG, inner, border_radius=10)
 
-        # 4. Nội dung luật chơi
-        rules = (
-            "QUY TẮC ĐÁNH BÀI — Bạn có thể đánh một lá bài nếu nó:\n"
-            "  • Cùng màu hoặc cùng số với lá trên cùng.\n"
-            "  • Cùng ký hiệu/chức năng (VD: Cấm lượt đè lên Cấm lượt).\n"
-            "  • Nếu không có bài để đánh: phải rút 1 lá.\n"
-            "\n"
-            "HÔ 'UNO':\n"
-            "  • Phải hô khi vừa đánh lá bài kế cuối xuống.\n"
-            "  • Quên hô → bị phạt rút thêm 2 lá!\n"
-            "\n"
-            "KẾT THÚC:\n"
-            "  • Ai hết bài trên tay trước người đó thắng.\n"
-            "  • Đa người chơi: xếp hạng theo số lá bài còn lại."
+        # 4. Nội dung quy tắc chơi
+        content = (
+            "[1] NGUYÊN TẮC ĐÁNH BÀI:\n"
+            "• Đánh hợp lệ nếu: Cùng hệ màu, Cùng con số, hoặc Cùng chức năng với lá bài cũ.\n"
+            "• Nếu bí bài: Bắt buộc bấm Rút Bài 1 lá. Hệ thống cho phép đánh luôn lá vừa rút hoặc Bỏ Qua lượt.\n\n"
+            "[2] QUYỀN NĂNG THẺ ĐẶC BIỆT THẦN THÁNH:\n"
+            "• Đổi Màu (Wild): Được thả bất cứ lúc nào để chuyển màu ván bài.\n"
+            "• +4 (Wild Draw 4): Bắt đối thủ ôm 4 lá! ĐƯỢC ĐÁNH TỰ DO bất chấp trên tay bạn đang có bài hay không!\n\n"
+            "[3] KHẮC CỐT GHI TÂM HÔ UNO! TRÁNH ĂN PHẠT:\n"
+            "• Nhấn gấp nút UNO khi chuẩn bị đánh lá bài kế cuối (nghĩa là trên tay sẽ xót lại đúng 1 thẻ).\n"
+            "• Nếu quên nói mà đánh lá bài xuống báo hại bản thân sẽ bị phạt bốc 2 lá.\n"
+            "• Ván chơi sẽ tự kết thúc nếu ai đó may mắn xả sạch tụ bài của mình trước!"
+        )
+        self.screen.draw.text(
+            content, 
+            (85, 170),
+            width=620, 
+            fontsize=17, 
+            color="#1a2a4e", 
+            fontname="arial", 
+            lineheight=1.2
         )
 
         lines = self._wrap_text(rules, 16, 630)
