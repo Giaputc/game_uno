@@ -80,14 +80,16 @@ class SinglePlayerController:
             for i, c in enumerate(colors):
                 rect = pygame.Rect(WIDTH/2 - 180 + i*90, HEIGHT/2 - 40, 80, 80)
                 if rect.collidepoint(pos):
-                    self.game_logic.play_turn(0, self.pending_card_idx, c)
+                    self.game_logic.play_turn(0, self.pending_card_idx, chosen_color=c)
                     self.color_picker_active = False
+                    self.pending_card_idx = None
+                    self.last_move_time = time.time()
                     return
             return
 
-        # Nút Rút Bài
         if self.view.draw_btn_rect.collidepoint(pos):
             self.game_logic.draw_turn()
+            self.last_move_time = time.time()
             return
 
         # Nút UNO
@@ -108,6 +110,7 @@ class SinglePlayerController:
                         self.pending_card_idx = i
                     else:
                         self.game_logic.play_turn(0, i)
+                        self.last_move_time = time.time()
                 return
 
     def update(self):
