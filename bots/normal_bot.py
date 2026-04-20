@@ -19,7 +19,7 @@ class NormalBot:
             "action_card": 1.2      # Ưu tiên đánh bài chức năng (cấm lượt, +2, đổi chiều) để khống chế đối thủ
         }
 
-    def choose_action(self, hand, top_card, current_color, **kwargs):
+    def choose_action(self, hand, top_card, current_color, next_player_hand_size=5, all_players_info=None, **kwargs):
         valid_cards = self.get_valid_cards(hand, top_card, current_color)
         if not valid_cards:
             return None # Rút bài
@@ -59,7 +59,7 @@ class NormalBot:
 
         return score
 
-    def choose_color(self, hand):
+    def choose_color(self, hand, next_player_hand_size=5):
         """
         Khi đánh lá đổi màu, chọn màu mà bot đang giữ nhiều nhất
         """
@@ -80,13 +80,10 @@ class NormalBot:
         return counts
 
     def get_valid_cards(self, hand, top_card, current_color):
-        return [c for c in hand if self.is_valid(c, top_card, current_color, hand)]
+        return [c for c in hand if self.is_valid(c, top_card, current_color)]
 
-    def is_valid(self, card, top_card, current_color, hand):
-        if getattr(card, "color", None) == "black":
-            return True
-        if getattr(card, "color", None) == current_color:
-            return True
-        if hasattr(card, "value") and hasattr(top_card, "value") and card.value == top_card.value:
-            return True
+    def is_valid(self, card, top_card, current_color):
+        if getattr(card, "color", None) == "black": return True
+        if getattr(card, "color", None) == current_color: return True
+        if hasattr(card, "value") and hasattr(top_card, "value") and card.value == top_card.value: return True
         return False

@@ -65,7 +65,14 @@ class UnoGame:
         elif self.current_turn == "BOT":
             top_card = self.deck.get_top_card()
             # Bot gọi hành động
-            card_to_play = self.bot.choose_action(self.bot_hand, top_card, self.current_color, next_player_hand_size=len(self.player_hand))
+            all_players_info = [len(self.player_hand), len(self.bot_hand)]
+            card_to_play = self.bot.choose_action(
+                self.bot_hand, 
+                top_card, 
+                self.current_color, 
+                next_player_hand_size=len(self.player_hand),
+                all_players_info=all_players_info
+            )
             if card_to_play:
                 self.bot_hand.remove(card_to_play)
                 
@@ -84,6 +91,11 @@ class UnoGame:
 
     def process_played_card(self, card, selected_color, player):
         self.deck.discard(card)
+        
+        # Cập nhật trí nhớ cho bot (nếu có hỗ trợ)
+        if hasattr(self.bot, "update_knowledge_discard"):
+            self.bot.update_knowledge_discard(card)
+        
         
         if card.color == "black":
             self.current_color = selected_color if selected_color else "red"
@@ -148,3 +160,7 @@ class UnoGame:
                 self.player_hand.extend(drawn)
                 self.messsage = "Bạn rút 1 lá. Đánh luôn hoặc Bỏ qua."
                 self.player_has_drawn = True
+                
+                # Báo cho bot biết bạn có thể đang thiếu màu hiện tại
+                if hasattr(self.bot, "update_knowledge_draw"):
+                    self.bot.update_knowledge_draw("PLAYER", self.current_color)
