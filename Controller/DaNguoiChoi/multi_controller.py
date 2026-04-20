@@ -9,38 +9,40 @@ from bots.hard_bot import HardBot
 from view.DaNguoiChoi.multi_game_view import MultiGameView
 from view.font_helper import draw_text_shadow
 from settings import WIDTH, HEIGHT
+import view.sfx_manager as sfx
 
 _COLOR_MAP = {'red':(220,53,69),'green':(40,167,69),'blue':(0,123,255),'yellow':(255,193,7)}
+
 
 class MultiPlayerController:
     def __init__(self, main_controller):
         self.main_controller = main_controller
         self.game_logic = None
-        self.view = MultiGameView(self.main_controller.screen if hasattr(self.main_controller, 'screen') else None, WIDTH, HEIGHT)
+        self.view = MultiGameView(
+            self.main_controller.screen if hasattr(self.main_controller, 'screen') else None,
+            WIDTH, HEIGHT
+        )
         self.last_move_time = 0
         self.color_picker_active = False
+        self._win_sfx_played = False
 
     def get_screen(self):
         import __main__
         return getattr(__main__, 'screen', None)
 
-
     def start_game(self, mode):
-        # mode là "P3" hoặc "P4"
         self.main_controller.game_state = "PLAYING_MULTI"
         self.color_picker_active = False
-        
+        self._win_sfx_played = False
+
         from model.player import AIPlayer
         players = [Player("You", is_human=True)]
-        
-        # P3: Easy + Normal
-        # P4: Easy + Normal + Hard
-        players.append(AIPlayer("Bot 1 (Easy)", EasyBot()))
-        players.append(AIPlayer("Bot 2 (Normal)", NormalBot()))
-        
+        players.append(AIPlayer("Bot 1 (Mức Dễ)",   EasyBot()))
+        players.append(AIPlayer("Bot 2 (Mức Vừa)", NormalBot()))
+
         if mode == "P4":
-            players.append(AIPlayer("Bot 3 (Hard)", HardBot()))
-            
+            players.append(AIPlayer("Bot 3 (Mức Khó)", HardBot()))
+
         self.game_logic = GameLogic(players)
 
     def handle_click(self, pos, multi_buttons=None):
@@ -61,7 +63,6 @@ class MultiPlayerController:
                 self.main_controller.game_state = "MENU"
             return
 
-        # Nút Back / Quit — liên kết với view
         if self.view.back_btn_rect.collidepoint(pos):
             self.main_controller.game_state = "MENU"
             return
@@ -70,41 +71,48 @@ class MultiPlayerController:
             return
 
         if self.game_logic.current_turn != 0:
-            return 
-            
+            return
+
+        # ── Chọn màu Wild ────────────────────────────────────────────────────
         if self.color_picker_active:
             colors = ["red", "green", "blue", "yellow"]
             for i, c in enumerate(colors):
                 rect = pygame.Rect(WIDTH/2 - 180 + i*90, HEIGHT/2 - 40, 80, 80)
                 if rect.collidepoint(pos):
                     self.game_logic.play_turn(0, self.pending_card_idx, chosen_color=c)
+                    sfx.play('card_play')
                     self.color_picker_active = False
                     self.pending_card_idx = None
                     self.last_move_time = time.time()
                     return
             return
 
+        # ── Nút Rút bài ──────────────────────────────────────────────────────
         if self.view.draw_btn_rect.collidepoint(pos):
             self.game_logic.draw_turn()
+            sfx.play('card_draw')
             self.last_move_time = time.time()
             return
 
+        # ── Nút UNO ──────────────────────────────────────────────────────────
         if self.view.uno_btn_rect.collidepoint(pos):
             self.game_logic.players[0].yell_uno()
+            sfx.play('uno_call')
             return
-            
-        # Dùng human_hit_rects: mỗi lá chỉ nhận click ở phần nhìn thấy
-        # reversed() để lá nằm trên cùng ưu tiên
+
+        # ── Click bài ────────────────────────────────────────────────────────
         for i in reversed(range(len(self.view.human_hit_rects))):
             rect = self.view.human_hit_rects[i]
             if rect.collidepoint(pos):
                 card = self.game_logic.players[0].hand[i]
-                if card.is_match(self.game_logic.get_top_card(), self.game_logic.current_color):
+                # Khi stacking: chỉ cho phép đánh đúng loại bài cộng dồn
+                if self.game_logic.can_play_card(card):
                     if card.color == "black":
                         self.color_picker_active = True
                         self.pending_card_idx = i
                     else:
                         self.game_logic.play_turn(0, i)
+                        sfx.play('card_play')
                         self.last_move_time = time.time()
                 return
 
@@ -112,32 +120,49 @@ class MultiPlayerController:
         if self.game_logic and not self.game_logic.game_over:
             if self.game_logic.check_empty_deck_winner():
                 return
-                
-            if self.game_logic.current_turn != 0:
+
+            # Lấy người chơi hiện tại
+            curr_idx = self.game_logic.current_turn
+            curr_player = self.game_logic.players[curr_idx]
+
+            # Nếu là Bot (không phải con người), thực hiện nước đi tự động
+            if not curr_player.is_human:
                 if time.time() - self.last_move_time > 1.2:
                     self.last_move_time = time.time()
-                    bot_idx = self.game_logic.current_turn
-                    bot = self.game_logic.players[bot_idx]
                     
-                    next_player_idx = (bot_idx + self.game_logic.direction) % len(self.game_logic.players)
-                    max_hand_size = len(self.game_logic.players[next_player_idx].hand)
+                    # Xác định đối thủ tiếp theo để bot tính toán (người tiếp tực theo hướng quay)
+                    next_idx = (curr_idx + self.game_logic.direction) % len(self.game_logic.players)
+                    next_hand_size = len(self.game_logic.players[next_idx].hand)
 
-                    card_idx, picked_color = bot.decide_move(self.game_logic.get_top_card(), self.game_logic.current_color, next_player_hand_size=max_hand_size)
-                    
+                    card_idx, picked_color = curr_player.decide_move(
+                        self.game_logic.get_top_card(),
+                        self.game_logic.current_color,
+                        next_player_hand_size=next_hand_size,
+                        pending_draw_type=self.game_logic.pending_draw_type,
+                        all_players_info=[len(p.hand) for p in self.game_logic.players]
+                    )
                     if card_idx is not None:
-                        self.game_logic.play_turn(bot_idx, card_idx, picked_color)
+                        self.game_logic.play_turn(curr_idx, card_idx, picked_color)
+                        sfx.play('card_play')
                     else:
                         self.game_logic.draw_turn()
+                        sfx.play('card_draw')
 
     def draw(self, mouse_pos):
-        if not self.view.screen: 
+        if not self.view.screen:
             self.view.screen = self.get_screen()
-            
+
         if self.game_logic.game_over:
-            self.view.draw_ranking(self.game_logic.players)
+            if not self._win_sfx_played:
+                sfx.play('win')
+                self._win_sfx_played = True
+            
+            # Lấy điểm số từ game_logic
+            score = getattr(self.game_logic, 'win_score', 0)
+            self.view.draw_ranking(self.game_logic.players, win_score=score)
         else:
             self.view.draw(self.game_logic, mouse_pos)
-            
+
             if self.color_picker_active:
                 surf = self.view.screen.surface
                 overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)

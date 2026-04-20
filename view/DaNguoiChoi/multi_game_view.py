@@ -1,4 +1,5 @@
 import os
+import math
 import pygame
 from pathlib import Path
 from view.font_helper import draw_text, draw_text_shadow, draw_button
@@ -64,8 +65,8 @@ class MultiGameView:
             img = pygame.image.load(back_path).convert_alpha()
             self.back_image = pygame.transform.scale(img, (60, 90))
 
-        # Nút UNO (góc phải dưới)
-        self.uno_btn_rect = pygame.Rect(self.width - 110, self.height - 70, 90, 45)
+        # Nút UNO phía trên-phải của bộ bài 7 lá
+        self.uno_btn_rect = pygame.Rect(560, 443, 80, 36)
         # Nút Rút bài (bên trái giữa)
         self.draw_btn_rect = pygame.Rect(
             self.width // 2 - 120, self.height // 2 - 50, 60, 90
@@ -114,10 +115,7 @@ class MultiGameView:
 
     def _draw_top_bar(self, mouse_pos):
         """Vẽ thanh menu Back / Quit ở góc trên bên phải."""
-        # Nền mờ cho thanh
-        bar = pygame.Surface((self.width, _TOP_BAR_H), pygame.SRCALPHA)
-        bar.fill((0, 0, 0, 90))
-        self.screen.surface.blit(bar, (0, 0))
+        # Removed dark background bar per user request
 
         # Nút QUIT
         hov_q = self.quit_btn_rect.collidepoint(mouse_pos)
@@ -231,24 +229,25 @@ class MultiGameView:
             # Vẽ bài có hiệu ứng
             card.draw(self.screen.surface, cx, cy, card_w, card_h)
 
-        # 5.5 Vẽ Discard Pile đè lên trên để bài vừa đánh ra luôn nổi lướt qua màn hình
+        # 5.5 Vẽ Discard Pile
         top_card    = game_logic.get_top_card()
         discard_rect = pygame.Rect(self.width // 2 + 20, self.height // 2 - 50, 60, 90)
         if top_card:
             top_card.is_hovered = False
             top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 60, 90)
 
+        # 5.6 Mũi tên hướng đi + cộng dồn stacking
+        arrow_cx = self.width // 2 - 20
+        arrow_cy = self.height // 2 - 5
+        self._draw_direction_indicator(self.screen.surface, arrow_cx, arrow_cy, game_logic.direction)
+
+        # 5.7 Bỏ text cộng dồn theo yêu cầu
+
         # 6. Nút UNO
         uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 22,
+        draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 18,
                     (255, 80, 80) if uno_hov else (220, 0, 0),
-                    _NAVY, (255, 255, 255), hover=uno_hov, radius=10)
-
-        # 7. Lượt hiện tại
-        turn_text = f"Lượt: {game_logic.players[game_logic.current_turn].name}"
-        draw_text_shadow(self.screen.surface, turn_text, 22, (255, 255, 255),
-                         shadow_color=(0, 0, 0), offset=(2, 2),
-                         center=(self.width // 2, self.height // 2 + 55), bold=True)
+                    _NAVY, (255, 255, 255), hover=uno_hov, radius=8)
 
         # 8. Thanh menu trên cùng (vẽ sau cùng để không bị phủ)
         self._draw_top_bar(mouse_pos)
@@ -264,8 +263,8 @@ class MultiGameView:
                   26, (255, 255, 255),
                   center=(self.width // 2, self.height // 2 + 70))
 
-    def draw_ranking(self, players):
-        """Màn hình xếp hạng sau khi game kết thúc."""
+    def draw_ranking(self, players, win_score=0):
+        """Màn hình xếp hạng sau khi game kết thúc (MultiPlayer)."""
         overlay = pygame.Surface((self.width, self.height))
         overlay.fill((10, 10, 30))
         self.screen.blit(overlay, (0, 0))
@@ -309,8 +308,20 @@ class MultiGameView:
                       midleft=(row_rect.x + 70, row_rect.centery), bold=(rank == 0))
 
             cards_left   = len(player.hand)
-            status_text  = "THẮNG!" if cards_left == 0 else f"{cards_left} lá bài"
-            status_color = (100, 255, 100) if cards_left == 0 else (200, 200, 200)
+            penalty_points = 0
+            for card in player.hand:
+                val = str(getattr(card, "value", ""))
+                if val in ["skip", "reverse", "+2"]: penalty_points += 20
+                elif val in ["black", "+4"] or getattr(card, "color", "") == "black": penalty_points += 50
+                elif val.isdigit(): penalty_points += int(val)
+
+            if rank == 0:
+                status_text  = f"0 điểm"
+                status_color = (100, 255, 100)
+            else:
+                status_text  = f"{penalty_points} điểm"
+                status_color = (255, 150, 150)
+
             draw_text(self.screen.surface, status_text, 22, status_color,
                       midright=(row_rect.right - 14, row_rect.centery))
 
@@ -322,3 +333,51 @@ class MultiGameView:
         draw_button(self.screen.surface, btn_rect, "Quay về Menu", 24,
                     (100, 40, 180), (200, 150, 255), (255, 255, 255), radius=12)
         self.ranking_back_btn = btn_rect
+
+    # ── Direction Indicator ────────────────────────────────────────
+
+    def _draw_direction_indicator(self, surface, cx, cy, direction):
+        if not hasattr(self, 'dir_angle'):
+            self.dir_angle = 0.0
+        self.dir_angle += 2.0 * direction
+        
+        radius = 30  # Thu nhỏ xuống 30px để không che bài
+        color = (0, 255, 255) if direction == 1 else (255, 200, 50)
+        
+        for offset in [0, 180]:
+            start_angle = math.radians(self.dir_angle + offset)
+            sweep = math.radians(120)
+            
+            n_seg = 20
+            pts = []
+            for i in range(n_seg + 1):
+                a = start_angle + sweep * (i / n_seg)
+                px = cx + radius * math.cos(a)
+                py = cy + radius * math.sin(a)
+                pts.append((int(px), int(py)))
+                
+            if len(pts) >= 2:
+                pygame.draw.lines(surface, color, False, pts, 4)
+                
+                head_idx = -1 if direction == 1 else 0
+                bg_idx = -2 if direction == 1 else 1
+                
+                ex, ey = pts[head_idx]
+                px, py = pts[bg_idx]
+                
+                dx, dy = ex - px, ey - py
+                length = math.hypot(dx, dy) or 1
+                dx /= length; dy /= length
+                
+                tip = (ex + dx*6, ey + dy*6)
+                left = (ex - dx*10 + dy*7, ey - dy*10 - dx*7)
+                right = (ex - dx*10 - dy*7, ey - dy*10 + dx*7)
+                pygame.draw.polygon(surface, color, [tip, left, right])
+        
+        try:
+            font = pygame.font.SysFont('arial', 11, bold=True)
+            txt = "CCW" if direction == -1 else "CW"
+            lbl = font.render(txt, True, color)
+            surface.blit(lbl, lbl.get_rect(center=(cx, cy)))
+        except Exception:
+            pass

@@ -37,7 +37,7 @@ class Player:
                 valid.append(i)
         return valid
 
-    def decide_move(self, game_state):
+    def decide_move(self, *args, **kwargs):
         # Override ở các loại Bot khác nhau
         raise NotImplementedError("This method should be overridden.")
 
@@ -47,19 +47,40 @@ class AIPlayer(Player):
         super().__init__(name, is_human=False)
         self.bot_logic = bot_logic
 
-    def decide_move(self, top_card, current_color, next_player_hand_size=5):
+    def decide_move(self, top_card, current_color, next_player_hand_size=5, pending_draw_type=None, **kwargs):
         import random
-        
-        # Bot quên hô UNO hay không (Easy hay quên hơn)
-        if len(self.hand) == 2:
-            if hasattr(self.bot_logic, "name") and "Easy" in getattr(self.bot_logic, "name", "") and random.choice([True, False]):
-                pass
-            else:
-                self.yell_uno()
+        from settings import UNO_SHOUT_RATES
 
-        # Uỷ quyền chọn bài cho thuật toán thuật toán
-        card = self.bot_logic.choose_action(self.hand, top_card, current_color, next_player_hand_size=next_player_hand_size)
-        
+        # ── Xử lý Stacking Rule: nếu đang bị cộng dồn, chỉ được đánh cùng loại ──
+        if pending_draw_type:
+            stack_cards = [c for c in self.hand if str(getattr(c, "value", "")) == pending_draw_type]
+            if stack_cards:
+                idx = self.hand.index(stack_cards[0])
+                return idx, None  # Chồng bài
+            else:
+                return None, None  # Phải rút
+
+        # ── Tỷ lệ hô UNO theo độ khó ──
+        bot_name = getattr(self.bot_logic, "name", "")
+        shout_chance = 1.0  # Mặc định Hard
+        for key, rate in UNO_SHOUT_RATES.items():
+            if key in bot_name:
+                shout_chance = rate
+                break
+
+        if len(self.hand) == 1:
+            if random.random() < shout_chance:
+                self.yell_uno()
+            # Nếu không vượt qua xác suất: quên hô UNO → bị phạt sau khi đánh
+
+        # ── Uỷ quyền chọn bài cho thuật toán bot ──
+        # Truyền thêm all_players_info nếu có (để bot nhắm mục tiêu)
+        card = self.bot_logic.choose_action(
+            self.hand, top_card, current_color,
+            next_player_hand_size=next_player_hand_size,
+            all_players_info=kwargs.get("all_players_info")
+        )
+
         if card:
             idx = self.hand.index(card)
             chosen_color = None
