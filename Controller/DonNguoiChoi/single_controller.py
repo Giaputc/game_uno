@@ -98,11 +98,12 @@ class SinglePlayerController:
             self.last_move_time = time.time()
             return
 
-        # ── Nút UNO ──────────────────────────────────────────────────────────
-        if self.view.uno_btn_rect.collidepoint(pos):
-            self.game_logic.players[0].yell_uno()
-            sfx.play('uno_call')
-            return
+        # ── Nút UNO (chỉ được click khi có đúng 2 lá) ────────────────────────
+        if len(self.game_logic.players[0].hand) == 2:
+            if self.view.uno_btn_rect.collidepoint(pos):
+                self.game_logic.players[0].yell_uno()
+                sfx.play('uno_call')
+                return
 
         # ── Click bài trên tay ───────────────────────────────────────────────
         for i in reversed(range(len(self.view.human_hit_rects))):
@@ -131,10 +132,7 @@ class SinglePlayerController:
 
             # ── Auto-Draw cho người chơi khi bị phạt +2/+4 mà KHÔNG CÓ BÀI ĐỠ ──
             if curr_player.is_human and self.game_logic.pending_draw > 0:
-                has_stack_card = any(
-                    str(getattr(c, "value", "")) == self.game_logic.pending_draw_type 
-                    for c in curr_player.hand
-                )
+                has_stack_card = any(self.game_logic.can_play_card(c) for c in curr_player.hand)
                 if not has_stack_card:
                     if time.time() - self.last_bot_move_time > 1.5:
                         self.game_logic.draw_turn()

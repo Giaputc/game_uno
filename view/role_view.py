@@ -69,9 +69,9 @@ class RoleView:
         )
 
         # 3. Panel nội dung
-        panel = pygame.Rect(65, 130, 670, 400)
+        panel = pygame.Rect(65, 120, 670, 460)
         pygame.draw.rect(self._surf, (0, 0, 0), panel, border_radius=12)
-        inner = pygame.Rect(70, 135, 660, 390)
+        inner = pygame.Rect(70, 125, 660, 450)
         pygame.draw.rect(self._surf, _PANEL_BG, inner, border_radius=10)
 
         # 4. Nội dung quy tắc chơi
@@ -88,12 +88,12 @@ class RoleView:
             "• Nếu quên nói mà đánh lá bài xuống báo hại bản thân sẽ bị phạt bốc 2 lá.\n"
             "• Ván chơi sẽ tự kết thúc nếu ai đó may mắn xả sạch tụ bài của mình trước!"
         )
-        lines_to_draw = self._wrap_text(content, 17, 620)
-        y_offset = 145
+        lines_to_draw = self._wrap_text(content, 16, 620)
+        y_offset = 140
         for line in lines_to_draw:
             if line:
-                draw_text(self._surf, line, 17, (26, 42, 78), topleft=(85, y_offset))
-            y_offset += 24
+                draw_text(self._surf, line, 16, (26, 42, 78), topleft=(85, y_offset))
+            y_offset += 23
 
         # 5. Nút Back / Quit
         for btn in buttons:
