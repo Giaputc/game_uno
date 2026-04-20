@@ -19,7 +19,7 @@ class EasyBot:
             return random.choice(valid_cards)
         return None  # Rút bài
 
-    def choose_color(self):
+    def choose_color(self, hand=None, next_player_hand_size=5, **kwargs):
         """
         Dùng khi bot đánh lá Đổi màu (Wild) hoặc +4 (Wild Draw 4)
         """

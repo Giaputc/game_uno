@@ -44,8 +44,13 @@ class Card:
 
         # Nội suy toạ độ (Lerp) để tạo chuyển động mượt
         if self.curr_x is None or self.curr_y is None:
-            self.curr_x = target_x
-            self.curr_y = target_y
+            try:
+                from settings import WIDTH, HEIGHT
+                self.curr_x = WIDTH // 2 - 130
+                self.curr_y = HEIGHT // 2 - 55
+            except ImportError:
+                self.curr_x = target_x
+                self.curr_y = target_y
         else:
             self.curr_x += (target_x - self.curr_x) * 0.2
             self.curr_y += (target_y - self.curr_y) * 0.2

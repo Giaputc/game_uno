@@ -40,7 +40,10 @@ class Deck:
         if not self.cards:
             self.restock_from_discard()
         if self.cards:
-            return self.cards.pop()
+            card = self.cards.pop()
+            card.curr_x = None
+            card.curr_y = None
+            return card
         return None
 
     def discard(self, card):

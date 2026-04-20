@@ -122,11 +122,14 @@ class GameLogic:
             self.pending_draw_type = None
 
         # ── Phạt quên hô UNO ─────────────────────────────────────────────────
-        # Người chơi đánh lá bài cuối cùng (từ 1 xuống 0) nhưng chưa hô UNO
-        if len(player.hand) == 0 and not player.said_uno:
+        # Người chơi đánh lá bài kế cuối (từ 2 xuống 1) nhưng chưa hô UNO
+        if len(player.hand) == 1 and not player.said_uno:
             for _ in range(2):
                 if len(self.deck.cards) == 0:
-                    self.deck.recycle(self.discard_pile)
+                    if len(self.discard_pile) > 1:
+                        self.deck.recycle(self.discard_pile)
+                    else:
+                        break
                 c = self.deck.draw()
                 if c:
                     player.hand.append(c)

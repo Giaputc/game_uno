@@ -129,6 +129,19 @@ class SinglePlayerController:
             curr_idx = self.game_logic.current_turn
             curr_player = self.game_logic.players[curr_idx]
 
+            # ── Auto-Draw cho người chơi khi bị phạt +2/+4 mà KHÔNG CÓ BÀI ĐỠ ──
+            if curr_player.is_human and self.game_logic.pending_draw > 0:
+                has_stack_card = any(
+                    str(getattr(c, "value", "")) == self.game_logic.pending_draw_type 
+                    for c in curr_player.hand
+                )
+                if not has_stack_card:
+                    if time.time() - self.last_bot_move_time > 1.5:
+                        self.game_logic.draw_turn()
+                        sfx.play('card_draw')
+                        self.last_bot_move_time = time.time()
+                    return
+
             # Nếu là Bot (không phải con người), thực hiện nước đi tự động
             if not curr_player.is_human:
                 if time.time() - self.last_bot_move_time > 1.2:
