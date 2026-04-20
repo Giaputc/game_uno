@@ -54,8 +54,8 @@ class NormalBot:
             score += self.weights["action_card"]
 
         # Ưu tiên xả điểm cao
-        if isinstance(val, int):
-            score += val * self.weights["card_value"]
+        if isinstance(val, str) and val.isdigit():
+            score += int(val) * self.weights["card_value"]
 
         return score
 

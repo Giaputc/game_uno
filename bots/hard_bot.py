@@ -45,39 +45,46 @@ class HardBot:
         return best_card
 
     def minimax_decision(self, valid_cards, hand, current_color, next_player_hand_size):
-        """
-        Quyết định theo Minimax heuristic:
-        Minimax giả định rằng ta và đối thủ luân phiên giành vị thế. 
-        Khi Next Player (đối thủ ngay sau) sắp hết bài (còn <= 2 lá), 
-        nước đi mang lại lợi ích tốt nhất là cấm lượt hoặc cộng dồn bài để "tăng min".
-        """
-        # Nếu tiếp theo là lượt của người sắp thắng
-        if next_player_hand_size <= 2:
-            # Ưu tiên cao nhất: Bắt rút thêm bài (+4)
-            for card in valid_cards:
-                if getattr(card, "value", "") == "+4": return card
-            # Ưu tiên cao thứ nhì: +2
-            for card in valid_cards:
-                if getattr(card, "value", "") == "+2": return card
-            # Ưu tiên tiếp theo: Cấm lượt hoặc đổi chiều
-            for card in valid_cards:
-                if getattr(card, "value", "") in ["skip", "reverse"]: return card
-
-        # Đánh giá theo hướng làm giảm điểm trên tay của bản thân cao nhất có thể
-        valid_cards.sort(key=lambda c: self._get_card_power(c), reverse=True)
-        return valid_cards[0]
-
-    def _get_card_power(self, card):
-        val = getattr(card, "value", 0)
-        color = getattr(card, "color", "")
-        power = 0
-        if color == "black":
-            power = 50
-        elif isinstance(val, str) and val in ["skip", "reverse", "+2"]:
-            power = 20
-        elif isinstance(val, int):
-            power = val
-        return power
+        # Đếm số lượng màu đang có trên tay
+        color_counts = {"red": 0, "green": 0, "blue": 0, "yellow": 0}
+        for c in hand:
+            if getattr(c, "color", "") in color_counts:
+                color_counts[c.color] += 1
+                
+        best_score = -9999
+        best_card = valid_cards[0]
+        
+        for card in valid_cards:
+            score = 0
+            val = getattr(card, "value", "")
+            color = getattr(card, "color", "")
+            
+            # Tiêu chí 1: Nếu đối thủ sắp thắng, dồn toàn lực đánh chặn
+            if next_player_hand_size <= 2:
+                if val == "+4": score += 100
+                elif val == "+2": score += 80
+                elif val in ["skip", "reverse"]: score += 60
+                elif color == "black": score += 40
+            else:
+                # Tiêu chí 2: Đối thủ còn nhiều bài -> GIỮ LẠI bài đặc biệt để phòng thủ cuối game
+                if color == "black":
+                    score -= 50 
+                elif val in ["+2", "skip", "reverse"]:
+                    score -= 10
+                
+                # Tiêu chí 3: Ưu tiên đánh màu mà mình đang có nhiều nhất để giải tán bài nhanh
+                if color in color_counts:
+                    score += color_counts[color] * 5
+                    
+                # Tiêu chí 4: Xả bài số lớn để giảm điểm rủi ro
+                if isinstance(val, str) and val.isdigit():
+                    score += int(val)
+                    
+            if score > best_score:
+                best_score = score
+                best_card = card
+                
+        return best_card
 
     def choose_color(self, hand):
         counts = {"red": 0, "green": 0, "blue": 0, "yellow": 0}
