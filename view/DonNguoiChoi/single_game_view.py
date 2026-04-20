@@ -365,8 +365,8 @@ class SingleGameView:
                 pygame.draw.polygon(surface, color, [tip, left, right])
         
         try:
-            font = pygame.font.SysFont('arial', 11, bold=True)
-            txt = "CCW" if direction == -1 else "CW"
+            font = pygame.font.SysFont('arial', 12, bold=True)
+            txt = "NGƯỢC" if direction == -1 else "XUÔI"
             lbl = font.render(txt, True, color)
             surface.blit(lbl, lbl.get_rect(center=(cx, cy)))
         except Exception:
