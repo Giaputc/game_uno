@@ -214,6 +214,12 @@ class MultiGameView:
             cx = int(start_x + i * spacing)
             cx = min(cx, self.width - _SIDE_MARGIN - card_w)
             cy = y_base
+
+            # Nhấc lá bài lên nếu đang bị dính +2/+4 và lá bài này có thể đem ra đỡ (Stacking)
+            if game_logic.current_turn == 0 and game_logic.pending_draw > 0:
+                if game_logic.can_play_card(card):
+                    cy -= 20
+
             rect = pygame.Rect(cx, cy, card_w, card_h)
 
             # Cập nhật trạng thái hover
@@ -243,11 +249,15 @@ class MultiGameView:
 
         # 5.7 Bỏ text cộng dồn theo yêu cầu
 
-        # 6. Nút UNO
-        uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 18,
-                    (255, 80, 80) if uno_hov else (220, 0, 0),
-                    _NAVY, (255, 255, 255), hover=uno_hov, radius=8)
+        # 6. Nút UNO (Chỉ hiện khi sắp hết bài)
+        if hand_len == 2:
+            uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
+            bg_color = (255, 80, 80) if uno_hov else (220, 0, 0)
+            if not human.said_uno and (pygame.time.get_ticks() // 150) % 2 == 0:
+                bg_color = (255, 100, 100) # Sáng chớp nháy nhắc nhở
+                
+            draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 18,
+                        bg_color, _NAVY, (255, 255, 255), hover=uno_hov, radius=8)
 
         # 8. Thanh menu trên cùng (vẽ sau cùng để không bị phủ)
         self._draw_top_bar(mouse_pos)
