@@ -49,8 +49,8 @@ menu_buttons_config = {
 }
 
 role_buttons_config = {
-    'BACK':      MenuButton("Back", 710, 20, 70, 35, _BLUE,  _BLUE_H),
-    'QUIT_MINI': MenuButton("Quit", 630, 20, 70, 35, _RED,   _RED_H),
+    'BACK':      MenuButton("Quay lại", 680, 20, 100, 35, _BLUE,  _BLUE_H),
+    'QUIT_MINI': MenuButton("Thoát", 560, 20, 100, 35, _RED,   _RED_H),
 }
 
 difficulty_buttons = {

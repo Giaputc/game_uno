@@ -22,7 +22,7 @@ _TOP_BAR_H   = 55
 # Lề trái/phải cho vùng bài
 _SIDE_MARGIN = 10
 # Nút trên cùng bên phải
-_BTN_W, _BTN_H = 80, 38
+_BTN_W, _BTN_H = 100, 38
 # Kích thước tối thiểu của lá bài khi thu nhỏ
 _MIN_CARD_W  = 24
 _MIN_SPACING = 12
@@ -119,13 +119,13 @@ class MultiGameView:
 
         # Nút QUIT
         hov_q = self.quit_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.quit_btn_rect, "Quit", 18,
+        draw_button(self.screen.surface, self.quit_btn_rect, "Thoát", 18,
                     _RED_H if hov_q else _RED, _NAVY, (255, 255, 255),
                     hover=hov_q, radius=8)
 
         # Nút Back
         hov_b = self.back_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.back_btn_rect, "Back", 18,
+        draw_button(self.screen.surface, self.back_btn_rect, "Quay lại", 18,
                     _BLUE_H if hov_b else _BLUE, _NAVY, (255, 255, 255),
                     hover=hov_b, radius=8)
 

@@ -19,7 +19,7 @@ _COLOR_MAP = {
 
 _TOP_BAR_H   = 55          # chiều cao thanh menu trên cùng
 _SIDE_MARGIN = 10          # lề trái/phải cho vùng bài
-_BTN_W, _BTN_H = 80, 38   # kích thước nút
+_BTN_W, _BTN_H = 100, 38   # kích thước nút
 _MIN_CARD_W  = 28          # chiều rộng tối thiểu của lá bài khi thu nhỏ
 _MIN_SPACING = 14          # khoảng cách tối thiểu giữa các lá bài
 
@@ -115,12 +115,12 @@ class SingleGameView:
         # Removed dark background bar per user request
 
         hov_q = self.quit_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.quit_btn_rect, "Quit", 18,
+        draw_button(self.screen.surface, self.quit_btn_rect, "Thoát", 18,
                     _RED_H if hov_q else _RED, _NAVY, (255, 255, 255),
                     hover=hov_q, radius=8)
 
         hov_b = self.back_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.back_btn_rect, "Back", 18,
+        draw_button(self.screen.surface, self.back_btn_rect, "Quay lại", 18,
                     _BLUE_H if hov_b else _BLUE, _NAVY, (255, 255, 255),
                     hover=hov_b, radius=8)
 

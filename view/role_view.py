@@ -98,7 +98,7 @@ class RoleView:
         # 5. Nút Back / Quit
         for btn in buttons:
             hovered = btn.rect.collidepoint(mouse_pos)
-            is_quit = 'quit' in btn.text.lower()
+            is_quit = 'quit' in btn.text.lower() or 'thoát' in btn.text.lower()
             bg      = (_RED if is_quit else _BLUE)
             bg_h    = (_RED_H if is_quit else _BLUE_H)
             draw_button(
