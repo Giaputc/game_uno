@@ -87,15 +87,12 @@ class RoleView:
             "• Nếu quên nói mà đánh lá bài xuống báo hại bản thân sẽ bị phạt bốc 2 lá.\n"
             "• Ván chơi sẽ tự kết thúc nếu ai đó may mắn xả sạch tụ bài của mình trước!"
         )
-        self.screen.draw.text(
-            content, 
-            (85, 145),
-            width=620, 
-            fontsize=17, 
-            color="#1a2a4e", 
-            fontname="arial", 
-            lineheight=1.2
-        )
+        lines_to_draw = self._wrap_text(content, 17, 620)
+        y_offset = 145
+        for line in lines_to_draw:
+            if line:
+                draw_text(self._surf, line, 17, (26, 42, 78), topleft=(85, y_offset))
+            y_offset += 24
 
         # 5. Nút Back / Quit
         for btn in buttons:

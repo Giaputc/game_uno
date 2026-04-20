@@ -1,4 +1,5 @@
 import os
+import math
 import pygame
 from pathlib import Path
 from view.font_helper import draw_text, draw_text_shadow, draw_button
@@ -60,8 +61,8 @@ class SingleGameView:
             img = pygame.image.load(back_path).convert_alpha()
             self.back_image = pygame.transform.scale(img, (70, 105))
 
-        # Nút UNO (góc phải dưới)
-        self.uno_btn_rect  = pygame.Rect(self.width - 110, self.height - 70, 90, 45)
+        # Nút UNO phía trên-phải của bộ bài 7 lá (xấp xỉ cạnh phải hand)
+        self.uno_btn_rect  = pygame.Rect(560, 443, 80, 36)
         # Nút Rút bài (bên trái giữa, dưới bot cards)
         self.draw_btn_rect = pygame.Rect(self.width // 2 - 130, self.height // 2 - 55, 70, 105)
         # Nút Back / Quit — vẽ ngay trong view
@@ -70,6 +71,7 @@ class SingleGameView:
 
         self.human_card_rects = []
         self.human_hit_rects  = []   # hẹp hơn draw rect khi bài chồng nhau
+        self.ranking_back_btn = None
 
     # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -110,9 +112,7 @@ class SingleGameView:
 
     def _draw_top_bar(self, mouse_pos):
         """Vẽ thanh Quit / Back ở góc trên bên phải, tương tự màn hướng dẫn."""
-        bar = pygame.Surface((self.width, _TOP_BAR_H), pygame.SRCALPHA)
-        bar.fill((0, 0, 0, 90))
-        self.screen.surface.blit(bar, (0, 0))
+        # Removed dark background bar per user request
 
         hov_q = self.quit_btn_rect.collidepoint(mouse_pos)
         draw_button(self.screen.surface, self.quit_btn_rect, "Quit", 18,
@@ -225,28 +225,140 @@ class SingleGameView:
             top_card.is_hovered = False
             top_card.draw(self.screen.surface, discard_rect.x, discard_rect.y, 70, 105)
 
+        # 5.6 Mũi tên hướng đi + thông báo Stacking
+        arrow_cx = self.width // 2 - 15
+        arrow_cy = self.height // 2 - 5
+        self._draw_direction_indicator(self.screen.surface, arrow_cx, arrow_cy, game_logic.direction)
+
+        # Bỏ đi text hiện cộng dồn theo yêu cầu
+
         # 6. Nút UNO
         uno_hov = self.uno_btn_rect.collidepoint(mouse_pos)
-        draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 26,
+        draw_button(self.screen.surface, self.uno_btn_rect, "UNO", 18,
                     (255, 80, 80) if uno_hov else (220, 0, 0),
-                    _NAVY, (255, 255, 255), hover=uno_hov, radius=10)
+                    _NAVY, (255, 255, 255), hover=uno_hov, radius=8)
 
-        # 7. Trạng thái lượt (góc trái — dưới thanh menu)
-        turn_text = "Lượt của bạn" if game_logic.current_turn == 0 else f"Lượt của {game_logic.players[1].name}"
-        draw_text_shadow(self.screen.surface, turn_text, 24, (255, 255, 255),
-                         shadow_color=(0, 0, 0), offset=(2, 2),
-                         topleft=(12, _TOP_BAR_H + 4), bold=True)
+        # 7. Trạng thái lượt (đã xóa theo yêu cầu)
 
         # 8. Thanh menu (vẽ cuối để không bị phủ)
         self._draw_top_bar(mouse_pos)
 
     # ── Winner screen ────────────────────────────────────────────────────────
 
-    def draw_winner(self, winner_name):
-        self.screen.surface.fill((0, 0, 0))
-        draw_text_shadow(self.screen.surface, f"NGƯỜI CHIẾN THẮNG: {winner_name}",
-                         48, (255, 220, 30), shadow_color=(80, 40, 0), offset=(3, 3),
-                         center=(self.width // 2, self.height // 2), bold=True)
-        draw_text(self.screen.surface, "Chạm để quay về Menu",
-                  26, (255, 255, 255),
-                  center=(self.width // 2, self.height // 2 + 70))
+    def draw_ranking(self, players, win_score=0):
+        """Màn hình xếp hạng sau khi game kết thúc (Single Player)."""
+        overlay = pygame.Surface((self.width, self.height))
+        overlay.fill((10, 10, 30))
+        self.screen.blit(overlay, (0, 0))
+
+        title_rect = pygame.Rect(self.width // 2 - 220, 20, 440, 60)
+        pygame.draw.rect(self.screen.surface, (60, 30, 120), title_rect, border_radius=14)
+        pygame.draw.rect(self.screen.surface, (180, 120, 255), title_rect, 3, border_radius=14)
+        draw_text_shadow(self.screen.surface, "BẢNG XẾP HẠNG", 36, (255, 255, 255),
+                         shadow_color=(0, 0, 0), offset=(2, 2),
+                         center=title_rect.center, bold=True)
+
+        medal_colors = [(255, 215, 0), (192, 192, 192)]
+        sorted_players = sorted(players, key=lambda p: len(p.hand))
+
+        card_w, card_h = 440, 70
+        start_y, spacing = 130, 85
+
+        for rank, player in enumerate(sorted_players):
+            row_y    = start_y + rank * spacing
+            row_rect = pygame.Rect(self.width // 2 - card_w // 2, row_y, card_w, card_h)
+
+            if rank == 0:
+                bg_color, border_color = (80, 60, 10),  medal_colors[0]
+            elif rank == 1:
+                bg_color, border_color = (40, 40, 50),  medal_colors[1]
+            else:
+                bg_color, border_color = (30, 30, 50),  (90, 90, 130)
+
+            pygame.draw.rect(self.screen.surface, bg_color,    row_rect, border_radius=12)
+            pygame.draw.rect(self.screen.surface, border_color, row_rect, 3, border_radius=12)
+
+            medal_color = medal_colors[rank] if rank < 2 else (130, 130, 160)
+            label       = f"#{rank + 1}"
+            draw_text(self.screen.surface, label, 30, medal_color,
+                      midleft=(row_rect.x + 14, row_rect.centery), bold=True)
+
+            name_color = (255, 215, 0) if rank == 0 else (220, 220, 255)
+            draw_text(self.screen.surface, player.name, 26, name_color,
+                      midleft=(row_rect.x + 80, row_rect.centery), bold=(rank == 0))
+
+            cards_left = len(player.hand)
+            penalty_points = 0
+            for card in player.hand:
+                val = str(getattr(card, "value", ""))
+                if val in ["skip", "reverse", "+2"]: penalty_points += 20
+                elif val in ["black", "+4"] or getattr(card, "color", "") == "black": penalty_points += 50
+                elif val.isdigit(): penalty_points += int(val)
+
+            if rank == 0:
+                status_text  = f"0 điểm"
+                status_color = (100, 255, 100)
+            else:
+                status_text  = f"{penalty_points} điểm"
+                status_color = (255, 150, 150)
+
+            draw_text(self.screen.surface, status_text, 24, status_color,
+                      midright=(row_rect.right - 14, row_rect.centery))
+
+        btn_rect = pygame.Rect(
+            self.width // 2 - 130,
+            start_y + len(sorted_players) * spacing + 40,
+            260, 50
+        )
+        draw_button(self.screen.surface, btn_rect, "Quay về Menu", 24,
+                    (100, 40, 180), (200, 150, 255), (255, 255, 255), radius=12)
+        self.ranking_back_btn = btn_rect
+
+    # ── Direction Indicator ───────────────────────────────────────────────────
+
+    def _draw_direction_indicator(self, surface, cx, cy, direction):
+        if not hasattr(self, 'dir_angle'):
+            self.dir_angle = 0.0
+        self.dir_angle += 2.0 * direction
+        
+        radius = 30  # Thu nhỏ để không che bài bốc
+        color = (0, 255, 255) if direction == 1 else (255, 200, 50)
+        
+        for offset in [0, 180]:
+            start_angle = math.radians(self.dir_angle + offset)
+            sweep = math.radians(120)
+            
+            n_seg = 20
+            pts = []
+            for i in range(n_seg + 1):
+                a = start_angle + sweep * (i / n_seg)
+                px = cx + radius * math.cos(a)
+                py = cy + radius * math.sin(a)
+                pts.append((int(px), int(py)))
+                
+            if len(pts) >= 2:
+                pygame.draw.lines(surface, color, False, pts, 4)
+                
+                head_idx = -1 if direction == 1 else 0
+                bg_idx = -2 if direction == 1 else 1
+                
+                ex, ey = pts[head_idx]
+                px, py = pts[bg_idx]
+                
+                dx, dy = ex - px, ey - py
+                length = math.hypot(dx, dy) or 1
+                dx /= length; dy /= length
+                
+                tip = (ex + dx*6, ey + dy*6)
+                left = (ex - dx*10 + dy*7, ey - dy*10 - dx*7)
+                right = (ex - dx*10 - dy*7, ey - dy*10 + dx*7)
+                pygame.draw.polygon(surface, color, [tip, left, right])
+        
+        try:
+            font = pygame.font.SysFont('arial', 11, bold=True)
+            txt = "CCW" if direction == -1 else "CW"
+            lbl = font.render(txt, True, color)
+            surface.blit(lbl, lbl.get_rect(center=(cx, cy)))
+        except Exception:
+            pass
+

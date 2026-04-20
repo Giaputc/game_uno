@@ -7,6 +7,20 @@ WIDTH  = 800
 HEIGHT = 600
 TITLE  = "Uno Game - UTC Project"
 
+# --- HẰNG SỐ GAME ---
+COLORS = ["red", "green", "blue", "yellow"]
+
+# Tỷ lệ nhớ hô UNO theo cấp độ (dựa vào tên bot logic)
+# Key phải khớp với chuỗi con trong tên Bot (Dễ, Vừa, Khó)
+UNO_SHOUT_RATES = {
+    "Dễ":   0.50,  # 50% nhớ hô
+    "Vừa":   0.90,  # 90% nhớ hô
+    "Khó":   1.00,  # 100% luôn nhớ hô
+}
+
+# Bật/tắt âm thanh
+SFX_ENABLED = True
+
 # ── Màu sắc chuẩn theo reference design ────────────────────────────────────
 _ORANGE  = (239, 100,  72)
 _HOVER   = (255, 130, 100)

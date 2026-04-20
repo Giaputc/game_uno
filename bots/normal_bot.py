@@ -8,7 +8,7 @@ class NormalBot:
     hợp lệ. Sau đó chọn lá bài có điểm cao nhất. Trọng số này có thể được huấn luyện bằng 
     các thuật toán tối ưu tiến hóa (Genetic Algorithm) trong quá trình huấn luyện offline.
     """
-    def __init__(self, name="NormalBot", weights=None):
+    def __init__(self, name="Vừa", weights=None):
         self.name = name
         # Các trọng số (nhiễm sắc thể trong Genetic Algorithm) 
         # Có thể được tinh chỉnh bằng Genetic Algorithm

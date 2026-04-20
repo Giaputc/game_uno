@@ -9,14 +9,20 @@ from view.DaNguoiChoi.multi_select_view import MultiSelectView
 from Controller.game_controller import GameController
 from Controller.DonNguoiChoi.single_controller import SinglePlayerController
 from Controller.DaNguoiChoi.multi_controller import MultiPlayerController
+import view.sfx_manager as sfx
 
 class AppManager:
     def __init__(self, screen):
         self.screen = screen
         self.gif_bg = LandingPageGIF("Landing-Page.gif")
         self.controller = GameController()
-        
-        self.single_player_ctr = SinglePlayerController(self.controller)  
+        # Đính kèm screen vào controller để Single/Multi có thể truy cập
+        self.controller.screen = screen
+
+        # Khởi tạo SFX
+        sfx.init()
+
+        self.single_player_ctr = SinglePlayerController(self.controller)
         self.multi_player_ctr = MultiPlayerController(self.controller)
         self.menu_buttons, self.role_buttons, self.diff_buttons, self.multi_buttons = init_buttons()
         #View
@@ -24,6 +30,7 @@ class AppManager:
         self.role_view = RoleView(screen, WIDTH, HEIGHT)
         self.diff_view = DifficultyView(screen, WIDTH, HEIGHT)
         self.multi_select_view = MultiSelectView(screen, WIDTH, HEIGHT)
+
 
     def update(self):
         state = self.controller.game_state
@@ -36,7 +43,13 @@ class AppManager:
             
     def draw(self):
         state = self.controller.game_state
-        mouse_pos = pygame.mouse.get_pos()
+        
+        real_pos = pygame.mouse.get_pos()
+        import builtins
+        if hasattr(builtins, 'global_zoom_camera') and builtins.global_zoom_camera:
+            mouse_pos = builtins.global_zoom_camera.translate_pos(real_pos)
+        else:
+            mouse_pos = real_pos
 
         if state == "SPLASH":
             self.menu_view.draw_splash(self.gif_bg)
