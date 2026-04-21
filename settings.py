@@ -42,10 +42,11 @@ _BH =  56   # button height
 _BX = WIDTH // 2 - _BW // 2
 
 menu_buttons_config = {
-    'SINGLE': MenuButton("Đơn người chơi", _BX, 270, _BW, _BH, _ORANGE, _HOVER),
-    'MULTI':  MenuButton("Đa người chơi",  _BX, 345, _BW, _BH, _ORANGE, _HOVER),
-    'GUIDE':  MenuButton("Hướng dẫn chơi", _BX, 420, _BW, _BH, _ORANGE, _HOVER),
-    'QUIT':   MenuButton("Thoát",           _BX, 495, _BW, _BH, _RED,    _RED_H),
+    'SINGLE': MenuButton("Đơn người chơi", _BX, 250, _BW, _BH, _ORANGE, _HOVER),
+    'MULTI':  MenuButton("Đa người chơi",  _BX, 315, _BW, _BH, _ORANGE, _HOVER),
+    'GUIDE':  MenuButton("Hướng dẫn chơi", _BX, 380, _BW, _BH, _ORANGE, _HOVER),
+    'CREDIT': MenuButton("Thông tin tác giả",_BX, 445, _BW, _BH, _ORANGE, _HOVER),
+    'QUIT':   MenuButton("Thoát",          _BX, 510, _BW, _BH, _RED,    _RED_H),
 }
 
 role_buttons_config = {
@@ -66,5 +67,9 @@ multi_buttons = {
     'BACK': MenuButton("Quay lại",      _BX, 475, _BW, _BH, _GRAY,   _GRAY_H),
 }
 
+credit_buttons_config = {
+    'BACK':   MenuButton("Quay lại",_BX, 510, _BW, _BH, _GRAY,   _GRAY_H),
+}
+
 def init_buttons():
-    return menu_buttons_config, role_buttons_config, difficulty_buttons, multi_buttons
+    return menu_buttons_config, role_buttons_config, difficulty_buttons, multi_buttons, credit_buttons_config

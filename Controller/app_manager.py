@@ -24,7 +24,7 @@ class AppManager:
 
         self.single_player_ctr = SinglePlayerController(self.controller)
         self.multi_player_ctr = MultiPlayerController(self.controller)
-        self.menu_buttons, self.role_buttons, self.diff_buttons, self.multi_buttons = init_buttons()
+        self.menu_buttons, self.role_buttons, self.diff_buttons, self.multi_buttons, self.credit_buttons = init_buttons()
         #View
         self.menu_view = MenuView(screen, WIDTH, HEIGHT)
         self.role_view = RoleView(screen, WIDTH, HEIGHT)
@@ -57,6 +57,8 @@ class AppManager:
             self.menu_view.draw_main_menu(self.menu_buttons.values(), mouse_pos)
         elif state == "GUIDE":
             self.role_view.draw(self.role_buttons.values(), mouse_pos)
+        elif state == "CREDITS":
+            self.menu_view.draw_credits(self.credit_buttons.values(), mouse_pos)
         elif state == "DIFFICULTY_SELECT":
             self.diff_view.draw(self.diff_buttons.values(), mouse_pos)
         elif state == "MULTI_SELECT":
@@ -80,6 +82,8 @@ class AppManager:
                 self.controller.game_state = "MULTI_SELECT"
             elif action == 'GUIDE':
                 self.controller.game_state = "GUIDE"
+            elif action == 'CREDIT':
+                self.controller.game_state = "CREDITS"
             elif action == 'QUIT':
                 self.safe_exit()
         
@@ -100,6 +104,12 @@ class AppManager:
                 self.controller.game_state = "MENU"
             elif self.role_buttons['QUIT_MINI'].rect.collidepoint(pos):
                 self.safe_exit()
+
+        elif state == "CREDITS":
+            for key, btn in self.credit_buttons.items():
+                if btn.rect.collidepoint(pos):
+                    if key == 'BACK':
+                        self.controller.game_state = "MENU"
 
     def safe_exit(self):
         pygame.display.quit()

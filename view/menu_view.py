@@ -134,3 +134,26 @@ class MenuView:
         self._draw_title(title)
         for btn in buttons:
             self._draw_rounded_button(btn, mouse_pos)
+
+    def draw_credits(self, buttons, mouse_pos):
+        """Màn hình thông tin nhà phát triển."""
+        self._blit_bg()
+        self._draw_title("THÔNG TIN TÁC GIẢ")
+
+        y_start = 180
+        # Tên nhóm
+        draw_text_shadow(self._surf, "NHÓM 13", 42, WHITE, shadow_color=(0,0,0), offset=(2,2), center=(self.width/2, y_start), bold=True)
+        
+        y_start += 70
+        members = [
+            "Giáp Minh Hiển",
+            "Nguyễn Văn Giáp",
+            "Chử Hoàng Hiếu"
+        ]
+        
+        for name in members:
+            draw_text_shadow(self._surf, name, 34, TITLE_COLOR, shadow_color=(0,0,0), offset=(2,2), center=(self.width/2, y_start))
+            y_start += 50
+            
+        for btn in buttons:
+            self._draw_rounded_button(btn, mouse_pos)
