@@ -33,12 +33,12 @@ Chào mừng bạn đến với dự án Game UNO! Đây là một phiên bản 
 
 ### Yêu Cầu Hệ Thống
 - Python 3.8 trở lên.
-- Đã cài đặt thư viện `pygame`.
+- Cần cài đặt thư viện `pygame` và `pgzero` (Pygame Zero) để hỗ trợ chạy môi trường game.
 
 ### Cài Đặt
-Bạn mở Terminal (Command Prompt) tại thư mục game và chạy:
+Bạn mở Terminal (Command Prompt) tại thư mục game và chạy lệnh sau để cài đặt các thư viện cần thiết:
 ```bash
-pip install pygame
+pip install pygame pgzero
 ```
 
 ### Khởi Chạy
