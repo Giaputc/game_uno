@@ -107,14 +107,14 @@ class MenuView:
 
         # Logo trên cùng
         if self.logo:
-            lr = self.logo.get_rect(center=(self.width // 2, 110))
+            lr = self.logo.get_rect(center=(self.width // 2, 90))
             self._surf.blit(self.logo, lr)
 
         # Tiêu đề bên dưới logo
         draw_text_shadow(
             self._surf, "UNO GAME", 48, TITLE_COLOR,
             shadow_color=(80, 30, 0), offset=(3, 3),
-            center=(self.width / 2, 240), bold=True,
+            center=(self.width / 2, 220), bold=True,
         )
 
         # Các nút bấm

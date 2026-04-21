@@ -42,10 +42,10 @@ _BH =  56   # button height
 _BX = WIDTH // 2 - _BW // 2
 
 menu_buttons_config = {
-    'SINGLE': MenuButton("Đơn người chơi", _BX, 250, _BW, _BH, _ORANGE, _HOVER),
-    'MULTI':  MenuButton("Đa người chơi",  _BX, 315, _BW, _BH, _ORANGE, _HOVER),
-    'GUIDE':  MenuButton("Hướng dẫn chơi", _BX, 380, _BW, _BH, _ORANGE, _HOVER),
-    'CREDIT': MenuButton("Thông tin tác giả",_BX, 445, _BW, _BH, _ORANGE, _HOVER),
+    'SINGLE': MenuButton("Đơn người chơi", _BX, 270, _BW, _BH, _ORANGE, _HOVER),
+    'MULTI':  MenuButton("Đa người chơi",  _BX, 330, _BW, _BH, _ORANGE, _HOVER),
+    'GUIDE':  MenuButton("Hướng dẫn chơi", _BX, 390, _BW, _BH, _ORANGE, _HOVER),
+    'CREDIT': MenuButton("Thông tin tác giả",_BX, 450, _BW, _BH, _ORANGE, _HOVER),
     'QUIT':   MenuButton("Thoát",          _BX, 510, _BW, _BH, _RED,    _RED_H),
 }
 
