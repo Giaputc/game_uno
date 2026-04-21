@@ -14,6 +14,8 @@ class GameLogic:
         self.winner = None
         self.draw_penalty = 0
 
+        self.allow_stacking = (len(players) == 2) # Chỉ cho phép cộng dồn nếu chơi 2 người
+
         # ── Stacking Rule ─────────────────────────────────────────────────────
         self.pending_draw = 0           # Số bài cộng dồn chưa rút
         self.pending_draw_type = None   # "+2" hoặc "+4"
@@ -102,19 +104,33 @@ class GameLogic:
             # Nếu > 2 người: để final next_turn() tự chạy với direction mới
 
         elif val == "+2":
-            # Cộng dồn stacking
-            self.pending_draw += 2
-            if not self.pending_draw_type:
-                self.pending_draw_type = "+2"
-            self.next_turn()            # Chuyển đến người bị phạt → họ được quyền phản ứng
-            skip_final_advance = True   # KHÔNG advance nữa, giữ lượt của người bị phạt
+            if self.allow_stacking:
+                # Cộng dồn stacking
+                self.pending_draw += 2
+                if not self.pending_draw_type:
+                    self.pending_draw_type = "+2"
+                self.next_turn()            # Chuyển đến người bị phạt → họ được quyền phản ứng
+                skip_final_advance = True   # KHÔNG advance nữa, giữ lượt của người bị phạt
+            else:
+                self.next_turn()
+                self.draw_cards_for_current(2)
+                for p in self.players:
+                    if hasattr(p, "bot_logic") and hasattr(p.bot_logic, "update_knowledge_draw"):
+                        p.bot_logic.update_knowledge_draw(self.current_turn, self.current_color)
 
         elif val == "+4":
-            self.pending_draw += 4
-            if not self.pending_draw_type:
-                self.pending_draw_type = "+4"
-            self.next_turn()
-            skip_final_advance = True
+            if self.allow_stacking:
+                self.pending_draw += 4
+                if not self.pending_draw_type:
+                    self.pending_draw_type = "+4"
+                self.next_turn()
+                skip_final_advance = True
+            else:
+                self.next_turn()
+                self.draw_cards_for_current(4)
+                for p in self.players:
+                    if hasattr(p, "bot_logic") and hasattr(p.bot_logic, "update_knowledge_draw"):
+                        p.bot_logic.update_knowledge_draw(self.current_turn, self.current_color)
 
         else:
             # Lá thường: Reset pending nếu có (an toàn fallback)
